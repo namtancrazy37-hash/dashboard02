@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pharmacy Stock</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root,[data-theme=dark]{color-scheme:dark;--bg:#000;--deep:#161616;--card:#232323;--inp:#2d2d2d;--ink:#fff;--mut:#808080;--line:#414141;--red:#e50914;--wine:#461518;--ox:#6f181d;--navy:#192247;--blue:#4061e7;--alt:#d9b3b5;--green:#2fb67c;--amber:#f5a524;--purple:#9b5de5;--teal:#00b8d9;--pink:#ff6f91}
+[data-theme=light]{color-scheme:light;--bg:#f3f4f8;--deep:#e9ebf2;--card:#fff;--inp:#e4e7ef;--ink:#15171c;--mut:#667085;--line:#d3d8e3;--red:#d90812;--wine:#fde4e5;--ox:#f6c2c5;--navy:#dde4fb;--blue:#3556d8;--alt:#8a2a30;--green:#12875a;--amber:#b86e00;--purple:#7a3fd0;--teal:#0086a3;--pink:#d6336c}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);background:var(--bg);color:var(--ink);font:400 15px/1.5 "Netflix Sans","Helvetica Neue","Segoe UI",Roboto,Ubuntu,"Noto Sans Thai",system-ui,sans-serif;transition:background .2s,color .2s}
+svg{flex:none;vertical-align:middle}
+.wrap{max-width:1240px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.brand{display:flex;gap:14px;align-items:center}
+.logo{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--red),var(--purple))}
+h1{margin:0;font-size:clamp(26px,5vw,40px);font-weight:900;line-height:1.1;letter-spacing:-.02em}
+h2{margin:0 0 10px;font-size:17px;font-weight:600;display:flex;align-items:center;gap:8px}
+h2 svg{color:var(--c,var(--blue))}
+.sub{color:var(--mut);font-size:13px;margin-top:4px}
+nav{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+nav button{font:500 14px inherit;font-family:inherit;color:var(--mut);background:none;border:0;border-radius:10px;padding:9px 13px;cursor:pointer;display:inline-flex;gap:7px;align-items:center}
+nav button svg{color:var(--c,var(--mut))}
+nav button:hover{background:var(--deep)}
+nav button[aria-selected=true]{background:var(--inp);color:var(--ink)}
+nav .tg{border:1px solid var(--line);color:var(--ink);margin-left:8px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,.drop:focus-within{outline:2px solid var(--blue);outline-offset:2px}
+.cta{display:inline-flex;gap:8px;align-items:center;background:var(--red);color:#fff;border:0;border-radius:10px;padding:10px 20px;font:500 15px inherit;font-family:inherit;cursor:pointer}
+.bar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:end;background:var(--deep);border-radius:10px;padding:12px 14px;margin-bottom:14px}
+.bar label{display:flex;flex-direction:column;font-size:12px;color:var(--mut);gap:3px}
+input,select{font:inherit;color:var(--ink);background:var(--inp);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.pre{background:none;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer;font:inherit}
+.drop{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center;background:var(--deep);border:1px dashed var(--line);border-radius:12px;padding:18px;margin-bottom:14px}
+.drop.on{border-color:var(--blue)}.sr{position:absolute;opacity:0;width:1px;height:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;font-size:13px}.chip{background:var(--card);border-radius:8px;padding:4px 10px;color:var(--mut);display:inline-flex;gap:6px;align-items:center}.chip.ok{color:var(--ink)}.chip.ok svg{color:var(--green)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:14px}
+.kpi,.card{background:var(--card);border-radius:12px;padding:14px 16px;min-width:0}
+.kpi{display:flex;justify-content:space-between;gap:10px;border-top:3px solid var(--c,var(--line))}
+.ki{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent)}
+.kl{font-size:13px;color:var(--mut)}.kv{font-size:26px;font-weight:900;line-height:1.2;margin:2px 0}.ks{font-size:12px;color:var(--mut)}
+.kpi.al{background:var(--wine)}.kpi.al .kl,.kpi.al .ks{color:var(--alt)}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));margin-bottom:12px}
+.cw{position:relative;height:300px}
+.tw{overflow:auto;max-height:480px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:640px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{position:sticky;top:0;background:var(--card);color:var(--mut);font-weight:500}td.n,th.n{text-align:right}
+.b{display:inline-block;border-radius:8px;padding:1px 8px;font-size:12px;background:var(--inp);color:var(--ink);margin-right:4px}
+.b.r{background:var(--ox)}.b.w{background:var(--wine)}.b.i{background:var(--navy)}
+.b.g{background:color-mix(in srgb,var(--green) 22%,transparent);color:var(--green)}
+.b.a{background:color-mix(in srgb,var(--amber) 22%,transparent);color:var(--amber)}
+.b.p{background:color-mix(in srgb,var(--purple) 22%,transparent);color:var(--purple)}
+.mode{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.mode button{flex:1;min-width:200px;text-align:left;background:var(--card);color:var(--ink);border:1px solid transparent;border-radius:10px;padding:12px 14px;cursor:pointer;font:inherit}
+.mode button[aria-pressed=true]{border-color:var(--ink);background:var(--inp)}.mode small{display:block;color:var(--mut)}
+.note{font-size:12.5px;color:var(--mut);margin:8px 0 0}.empty{color:var(--mut);padding:24px 4px}
+ul.l{margin:0;padding:0;list-style:none}ul.l li{padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+ul.gap li{display:flex;gap:10px;align-items:flex-start}ul.gap svg{color:var(--amber);margin-top:3px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div class="brand"><div class="logo" data-i="pill" data-s="26"></div><div><h1>Pharmacy Stock</h1><div class="sub" id="sub">โหลดไฟล์ JSON เพื่อเริ่มต้น (ข้อมูลไม่ได้ฝังอยู่ในหน้านี้)</div></div></div>
+ <nav id="nav" aria-label="เมนู">
+  <button data-t="ov" style="--c:var(--blue)" aria-selected="true"><i data-i="grid"></i>ภาพรวม</button>
+  <button data-t="ex" style="--c:var(--amber)" aria-selected="false"><i data-i="cal"></i>วันหมดอายุ</button>
+  <button data-t="or" style="--c:var(--green)" aria-selected="false"><i data-i="cart"></i>สั่งซื้อ</button>
+  <button data-t="dp" style="--c:var(--pink)" aria-selected="false"><i data-i="pill"></i>รายการจ่ายยา</button>
+  <button data-t="fe" style="--c:var(--purple)" aria-selected="false"><i data-i="layers"></i>ตรวจ FEFO</button>
+  <button data-t="an" style="--c:var(--teal)" aria-selected="false"><i data-i="flask"></i>วิเคราะห์เพิ่มเติม</button>
+  <button class="tg" id="theme" type="button" aria-label="สลับโหมดสว่าง/มืด"></button>
+ </nav>
+</header>
+
+<label class="drop" id="drop">
+ <input class="sr" type="file" id="file" multiple accept=".json,application/json">
+ <span class="cta"><i data-i="up"></i>เลือกไฟล์ JSON</span>
+ <span>ระบบโหลดจากโฟลเดอร์ data อัตโนมัติ หรือเลือก/ลากไฟล์มาวางเองได้: ทะเบียนยา, คงคลัง (stock), ประวัติจ่ายยา (dispense log) ระบบแยกประเภทไฟล์จากโครงสร้างเอง</span>
+ <span class="chips" id="chips"></span>
+</label>
+<div id="msg" class="note"></div>
+
+<div class="bar" id="bar" hidden>
+ <label>ตั้งแต่<input type="date" id="pf"></label>
+ <label>ถึง (วันอ้างอิงหมดอายุ)<input type="date" id="pt"></label>
+ <button class="pre" data-d="7">7 วัน</button><button class="pre" data-d="30">30 วัน</button><button class="pre" data-d="0">ทั้งหมด</button>
+ <span class="sub" id="pinfo"></span>
+</div>
+<main id="view"><div class="empty">ยังไม่มีข้อมูล เลือกไฟล์ JSON ด้านบนก่อน</div></main>
+</div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const D={drug:{},stock:[],disp:[],asof:'',have:{}},P={from:'',to:''},M={m:'mix',n:30,all:false},V={tab:'ov',win:90,risk:true,q:'',bad:false};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>Math.round(n).toLocaleString('en-US'),f1=n=>(Math.round(n*10)/10).toLocaleString('en-US');
+const dd=(a,b)=>Math.round((Date.parse(a)-Date.parse(b))/864e5),dOf=x=>x.datetime.slice(0,10);
+const add=(d,n)=>new Date(Date.parse(d)+n*864e5).toISOString().slice(0,10);
+const nm=k=>D.drug[k]?D.drug[k].generic_name+' '+D.drug[k].strength:k;
+const ref=()=>P.to||D.asof||new Date().toISOString().slice(0,10);
+const inP=d=>(!P.from||dOf(d)>=P.from)&&(!P.to||dOf(d)<=P.to);
+const ST={active:'ใช้งาน',quarantine:'กักกัน',written_off:'ตัดจำหน่าย'};
+const PAL=['#4061e7','#e50914','#2fb67c','#f5a524','#9b5de5','#00b8d9','#ff6f91','#8bc34a'];
+const WD=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์'];
+const bd=(t,c)=>`<span class="b ${c||''}">${esc(t)}</span>`;
+
+/* ---------- icons ---------- */
+const IC={
+grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>',
+cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+cart:'<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/>',
+pill:'<path d="M10.5 20.5 3.5 13.5a4.95 4.95 0 0 1 7-7l7 7a4.95 4.95 0 0 1-7 7z"/><path d="m8.5 8.5 7 7"/>',
+sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+alert:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+box:'<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/>',
+clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+check:'<path d="M22 11.1V12a10 10 0 1 1-5.9-9.1"/><path d="m22 4-10 10-3-3"/>',
+shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+trend:'<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>',
+down:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
+up:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>',
+list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+ban:'<circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/>',
+dollar:'<path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+layers:'<path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/>',
+flask:'<path d="M9 3h6M10 3v6L4.5 19a2 2 0 0 0 1.8 3h11.4a2 2 0 0 0 1.8-3L14 9V3"/>',
+hash:'<path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/>',
+pie:'<path d="M21.2 15.9A10 10 0 1 1 8 2.8"/><path d="M22 12A10 10 0 0 0 12 2v10z"/>'};
+const I=(n,s=18)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]||''}</svg>`;
+const icons=()=>$$('[data-i]').forEach(e=>{e.innerHTML=I(e.dataset.i,+e.dataset.s||18);if(e.tagName==='I')e.style.display='inline-flex'});
+const kpi=(l,v,s,al,ic,c)=>`<div class="kpi${al?' al':''}" style="--c:${c||'var(--blue)'}"><div><div class="kl">${l}</div><div class="kv">${v}</div><div class="ks">${s||'&nbsp;'}</div></div><div class="ki">${I(ic||'hash',20)}</div></div>`;
+const h2=(t,ic,c)=>`<h2 style="--c:${c||'var(--blue)'}">${I(ic,18)}${t}</h2>`;
+
+/* ---------- theme ---------- */
+let T='dark';try{T=localStorage.getItem('ph-theme')==='light'?'light':'dark'}catch(e){}
+function applyTheme(){document.documentElement.dataset.theme=T;$('#theme').innerHTML=T==='dark'?I('sun')+'โหมดสว่าง':I('moon')+'โหมดมืด'}
+$('#theme').onclick=()=>{T=T==='dark'?'light':'dark';try{localStorage.setItem('ph-theme',T)}catch(e){}applyTheme();render()};
+
+/* ---------- charts ---------- */
+const ch={},cv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function chart(id,cfg){if(ch[id])ch[id].destroy();Chart.defaults.color=cv('--mut');Chart.defaults.borderColor=cv('--line');ch[id]=new Chart(document.getElementById(id),cfg)}
+function bar(id,rows,color,horiz){const c=color==='pal'?rows.map((_,i)=>PAL[i%PAL.length]):color;chart(id,{type:'bar',data:{labels:rows.map(r=>r[0]),datasets:[{data:rows.map(r=>r[1]),backgroundColor:c,borderRadius:4}]},options:{indexAxis:horiz?'y':'x',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:!horiz}},y:{grid:{display:!!horiz},beginAtZero:true}}}})}
+function stack(id,labels,sets){chart(id,{type:'bar',data:{labels,datasets:sets.map((s,i)=>({label:s[0],data:s[1],backgroundColor:PAL[i%PAL.length],borderRadius:2}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:sets.length>1,position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true}}}})}
+function donut(id,rows){chart(id,{type:'doughnut',data:{labels:rows.map(r=>r[0]),datasets:[{data:rows.map(r=>r[1]),backgroundColor:rows.map((r,i)=>r[2]||PAL[i%PAL.length]),borderColor:cv('--card'),borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}})}
+
+/* ---------- load files ---------- */
+const note=t=>{$('#msg').innerHTML+=esc(t)+'<br>'};
+async function ingest(files){
+ $('#msg').innerHTML='';
+ for(const f of files){try{
+  const j=JSON.parse(await f.text()),it=Array.isArray(j)?j:j.items;
+  if(!Array.isArray(it)||!it.length){note(f.name+': ไม่พบรายการใน items');continue}
+  const s=it[0],mt=j.meta||{};
+  if('generic_name' in s){D.drug={};it.forEach(i=>D.drug[i.sku]=i);D.have.drug=f.name+' ('+it.length+')'}
+  else if('lot' in s&&'expiry' in s){D.stock=it;if(mt.as_of)D.asof=mt.as_of;D.have.stock=f.name+' ('+it.length+')'}
+  else if('dispense_id' in s){D.disp=it;if(mt.as_of&&!D.asof)D.asof=mt.as_of;D.have.disp=f.name+' ('+it.length+')'}
+  else note(f.name+': ไม่รู้จักโครงสร้างไฟล์นี้')
+ }catch(e){note(f.name+': อ่านไฟล์ไม่ได้ ('+e.message+')')}}
+ const ds=D.disp.map(dOf).sort();
+ if(ds.length){P.from=ds[0];P.to=D.asof||ds[ds.length-1]}else if(D.asof){P.to=D.asof}
+ $('#pf').value=P.from;$('#pt').value=P.to;render()}
+$('#file').addEventListener('change',e=>{ingest([...e.target.files]);e.target.value=''});
+const dz=$('#drop');
+['dragenter','dragover'].forEach(v=>dz.addEventListener(v,e=>{e.preventDefault();dz.classList.add('on')}));
+['dragleave','drop'].forEach(v=>dz.addEventListener(v,e=>{e.preventDefault();dz.classList.remove('on')}));
+dz.addEventListener('drop',e=>ingest([...e.dataTransfer.files]));
+
+/* ---------- derived data ---------- */
+const lots=()=>D.stock.map(s=>{const days=s.expiry?dd(s.expiry,ref()):null,q=+s.qty_on_hand||0;return{...s,days,val:Math.max(q,0)*(+s.unit_cost||0),usable:s.status==='active'&&q>0&&days!==null&&days>=0}});
+function sk(){
+ const U={},days=P.from&&P.to?Math.max(1,dd(P.to,P.from)+1):30;
+ lots().forEach(l=>{const o=U[l.sku]=U[l.sku]||{sku:l.sku,use:0,usable:0,cost:0,cd:''};if(l.usable)o.usable+=l.qty_on_hand;if(l.received_date>=o.cd){o.cd=l.received_date;o.cost=+l.unit_cost||0}});
+ D.disp.forEach(d=>{if(d.type!=='void'&&d.qty>0&&inP(d)&&U[d.sku])U[d.sku].use+=d.qty});
+ return Object.values(U).map(o=>{
+  const rl=(D.drug[o.sku]||{}).reorder_level||0,daily=o.use/days,cover=daily?o.usable/daily:Infinity;
+  const tA=rl>0&&o.usable<=rl,qA=Math.max(0,2*rl-o.usable),tB=daily>0&&cover<M.n,qB=Math.max(0,daily*2*M.n-o.usable);
+  const t=M.m==='rl'?tA:M.m==='use'?tB:tA||tB;
+  const q=Math.ceil(M.m==='rl'?qA:M.m==='use'?qB:Math.max(tA?qA:0,tB?qB:0));
+  return{...o,rl,daily,cover,tA,tB,t,q:t?q:0,est:t?q*o.cost:0}})}
+function lotFlags(s){const f=[];if(!s.expiry)f.push('ไม่มีวันหมดอายุ');else if(s.expiry<s.received_date)f.push('หมดอายุก่อนวันรับเข้า');if(Object.keys(D.drug).length&&!D.drug[s.sku])f.push('SKU ไม่มีในทะเบียนยา');return f}
+function dFlags(d){const f=[],s=D.stock.find(x=>x.sku===d.sku&&x.lot===d.lot);
+ if(D.asof&&dOf(d)>D.asof)f.push('วันที่หลังวันที่ของข้อมูล');
+ if(D.stock.length){if(!s)f.push('ล็อตไม่มีในคงคลังของ SKU นี้');else if(s.expiry&&dOf(d)>s.expiry)f.push('จ่ายหลังหมดอายุ')}
+ if(!Number.isInteger(d.qty))f.push('จำนวนไม่ใช่จำนวนเต็ม');return f}
+const issues=()=>[...D.disp.flatMap(d=>dFlags(d).map(t=>[d.dispense_id,t])),...D.stock.flatMap(s=>lotFlags(s).map(t=>[s.stock_id,t]))];
+const need=(...k)=>{const m=k.filter(x=>!(x==='drug'?Object.keys(D.drug).length:x==='stock'?D.stock.length:D.disp.length));return m.length?`<div class="empty">ต้องโหลดไฟล์เพิ่ม: ${m.map(x=>({drug:'ทะเบียนยา',stock:'คงคลัง',disp:'ประวัติจ่ายยา'}[x])).join(', ')}</div>`:''};
+
+/* FEFO: ล็อตที่จ่าย vs ล็อต active อื่นของ SKU เดียวกันที่หมดอายุก่อน, รับเข้าแล้ว, ยังไม่หมดอายุ ณ วันจ่าย และยังมียอดคงเหลือ */
+function fefo(){
+ const bySku={},out=[];D.stock.forEach(s=>{(bySku[s.sku]=bySku[s.sku]||[]).push(s)});
+ D.disp.filter(d=>d.type!=='void'&&d.qty>0).forEach(d=>{
+  const used=D.stock.find(s=>s.sku===d.sku&&s.lot===d.lot);if(!used||!used.expiry)return;const day=dOf(d);
+  const earlier=(bySku[d.sku]||[]).filter(s=>s.lot!==d.lot&&s.status==='active'&&s.expiry&&s.expiry<used.expiry&&s.expiry>=day&&s.received_date<=day&&(+s.qty_on_hand||0)>0).sort((a,b)=>a.expiry<b.expiry?-1:1);
+  out.push({d,used,earlier,bad:earlier.length>0})});
+ return out}
+function phStats(){
+ const o={},fm={};if(D.stock.length)fefo().forEach(x=>{if(x.bad)fm[x.d.dispense_id]=1});
+ D.disp.filter(inP).forEach(d=>{const p=o[d.pharmacist_code||'-']=o[d.pharmacist_code||'-']||{p:d.pharmacist_code||'-',n:0,u:0,v:0,inc:0,fe:0};
+  if(d.type==='void'){p.v++}else if(d.qty>0){p.n++;p.u+=d.qty;if(fm[d.dispense_id])p.fe++}if(d.incident_ref)p.inc++});
+ return Object.values(o).sort((a,b)=>b.n-a.n)}
+
+/* ---------- views ---------- */
+function ov(){
+ const m=need('drug','stock');if(m){$('#view').innerHTML=m;return}
+ const L=lots(),S=sk(),ex=L.filter(l=>l.usable&&l.days<=60),nu=L.filter(l=>l.status!=='active'),low=S.filter(s=>s.t),
+  R=D.disp.filter(d=>inP(d)&&d.type!=='void'&&d.qty>0),
+  fb=D.disp.length?fefo().filter(x=>inP(x.d)&&x.bad).length:null;
+ const cov=S.filter(s=>isFinite(s.cover)).sort((a,b)=>a.cover-b.cover).slice(0,8);
+ const sv=['active','quarantine','written_off'].map((k,i)=>[ST[k],Math.round(L.filter(l=>l.status===k).reduce((a,l)=>a+l.val,0)),['#2fb67c','#f5a524','#e50914'][i]]);
+ $('#view').innerHTML=`<div class="kpis">${kpi('มูลค่าสต็อกที่ใช้ได้',fmt(L.filter(l=>l.usable).reduce((a,l)=>a+l.val,0))+' บาท',L.filter(l=>l.usable).length+' ล็อต',0,'dollar','var(--green)')}${kpi('SKU ที่ควรสั่ง',low.length,'จาก '+S.length+' SKU ที่มีคงคลัง',low.length,'cart','var(--blue)')}${kpi('ล็อตหมดอายุใน 60 วัน',ex.length,fmt(ex.reduce((a,l)=>a+l.val,0))+' บาท',ex.length,'hour2','var(--amber)')}${kpi('ล็อตกักกัน / ตัดจำหน่าย',nu.length,fmt(nu.reduce((a,l)=>a+l.val,0))+' บาท',0,'ban','var(--red)')}${kpi('รายการจ่ายในช่วงที่เลือก',R.length,fmt(R.reduce((a,d)=>a+d.qty,0))+' หน่วย',0,'pill','var(--pink)')}${fb===null?'':kpi('จ่ายไม่ตรง FEFO',fb,'ในช่วงที่เลือก',fb,'layers','var(--purple)')}</div>
+ <div class="grid"><div class="card">${h2('SKU ที่ของจะหมดเร็วที่สุด (วันที่พอใช้)','clock','var(--blue)')}<div class="cw"><canvas id="c1"></canvas></div><p class="note">คำนวณจากยอดที่ใช้ได้ ÷ อัตราจ่ายเฉลี่ยในช่วงที่เลือก</p></div>
+ <div class="card">${h2('มูลค่าสต็อกตามสถานะ (บาท)','pie','var(--teal)')}<div class="cw"><canvas id="c0"></canvas></div></div>
+ <div class="card">${h2('ควรสั่งก่อน','cart','var(--green)')}<ul class="l">${low.sort((a,b)=>a.cover-b.cover).slice(0,5).map(s=>`<li>${esc(nm(s.sku))} ${bd('เหลือ '+fmt(s.usable),'w')}${isFinite(s.cover)?bd('พอใช้ '+f1(s.cover)+' วัน','i'):''}</li>`).join('')||'<li class="ks">ไม่มี SKU ที่ต่ำกว่าเกณฑ์ตามวิธีที่เลือก</li>'}</ul>
+ <h2 style="margin-top:16px;--c:var(--amber)">${I('cal')}ใกล้หมดอายุ</h2><ul class="l">${L.filter(l=>l.usable).sort((a,b)=>a.days-b.days).slice(0,5).map(l=>`<li>${esc(nm(l.sku))} ล็อต ${esc(l.lot)} ${bd('อีก '+l.days+' วัน',l.days<=60?'w':'')}${bd(fmt(l.qty_on_hand)+' หน่วย')}</li>`).join('')}</ul></div></div>`;
+ bar('c1',cov.map(s=>[s.sku,Math.round(s.cover*10)/10]),'pal',true);donut('c0',sv)}
+IC.hour2=IC.clock;
+
+function ex(){
+ const m=need('stock');if(m){$('#view').innerHTML=m;return}
+ const L=lots(),rk=L.filter(l=>l.status!=='active'||l.days===null||l.days<=V.win);
+ const bk=[['หมดอายุแล้ว',l=>l.days<0],['0-30 วัน',l=>l.days>=0&&l.days<=30],['31-60',l=>l.days>30&&l.days<=60],['61-90',l=>l.days>60&&l.days<=90],['91-180',l=>l.days>90&&l.days<=180],['>180',l=>l.days>180]];
+ const bc=['#e50914','#f5a524','#f5a524','#00b8d9','#4061e7','#2fb67c'];
+ const act=L.filter(l=>l.status==='active'&&l.days!==null&&(+l.qty_on_hand>0||l.days>=0)),shown=(V.risk?rk:L).sort((a,b)=>(a.days??-1e9)-(b.days??-1e9));
+ $('#view').innerHTML=`<div class="mode"><label class="kl">ช่วงเฝ้าระวัง <select id="win">${[30,60,90,180].map(x=>`<option value="${x}"${V.win===x?' selected':''}>${x} วัน</option>`).join('')}</select></label>
+ <label class="kl"><input type="checkbox" id="risk"${V.risk?' checked':''}> แสดงเฉพาะล็อตที่ต้องจับตา</label></div>
+ <div class="kpis">${kpi('หมดอายุแล้วแต่ยังมียอดใช้งาน',L.filter(l=>l.status==='active'&&l.days<0&&l.qty_on_hand>0).length,'',L.some(l=>l.status==='active'&&l.days<0&&l.qty_on_hand>0),'alert','var(--red)')}${kpi('ใกล้หมดอายุใน '+V.win+' วัน',L.filter(l=>l.usable&&l.days<=V.win).length+' ล็อต',fmt(L.filter(l=>l.usable&&l.days<=V.win).reduce((a,l)=>a+l.val,0))+' บาท',0,'clock','var(--amber)')}${kpi('กักกัน',L.filter(l=>l.status==='quarantine').length+' ล็อต',fmt(L.filter(l=>l.status==='quarantine').reduce((a,l)=>a+l.val,0))+' บาท',0,'shield','var(--purple)')}${kpi('ตัดจำหน่าย',L.filter(l=>l.status==='written_off').length+' ล็อต','',0,'ban','var(--pink)')}${kpi('ไม่มีวันหมดอายุ',L.filter(l=>l.days===null).length+' ล็อต','',0,'cal','var(--teal)')}</div>
+ <div class="grid"><div class="card">${h2('จำนวนล็อตตามช่วงเวลาก่อนหมดอายุ (เฉพาะสถานะใช้งาน)','cal','var(--amber)')}<div class="cw"><canvas id="c2"></canvas></div><p class="note">นับ ณ วันที่ ${esc(ref())}</p></div></div>
+ <div class="card">${h2('รายการล็อต ('+shown.length+')','list','var(--blue)')}<div class="tw"><table><thead><tr><th>Stock</th><th>ยา</th><th>ล็อต</th><th>รับเข้า</th><th>หมดอายุ</th><th class="n">เหลืออีก (วัน)</th><th class="n">คงเหลือ</th><th class="n">มูลค่า</th><th>สถานะ</th></tr></thead><tbody>${shown.map(l=>`<tr><td>${esc(l.stock_id)}</td><td>${esc(nm(l.sku))}</td><td>${esc(l.lot)}</td><td>${esc(l.received_date)}</td><td>${esc(l.expiry||'-')}</td><td class="n">${l.days===null?'-':l.days}</td><td class="n">${fmt(l.qty_on_hand)}</td><td class="n">${fmt(l.val)}</td><td>${bd(ST[l.status]||l.status,l.status==='active'?'g':'w')}${l.days!==null&&l.days<0?bd('หมดอายุ','r'):l.days!==null&&l.days<=V.win?bd('ใกล้หมด','a'):''}${lotFlags(l).map(t=>bd(t,'r')).join('')}</td></tr>`).join('')}</tbody></table></div></div>`;
+ bar('c2',bk.map(([n,f])=>[n,act.filter(f).length]),bc,false);
+ $('#win').onchange=e=>{V.win=+e.target.value;ex()};$('#risk').onchange=e=>{V.risk=e.target.checked;ex()}}
+
+function or_(){
+ const m=need('drug','stock');if(m){$('#view').innerHTML=m;return}
+ const S=sk(),sh=(M.all?S:S.filter(s=>s.t)).sort((a,b)=>(b.t-a.t)||a.cover-b.cover),tot=S.filter(s=>s.t);
+ const md=[['rl','ตามเกณฑ์ reorder level','สั่งเมื่อยอดใช้ได้ ≤ เกณฑ์ สั่งเติมถึง 2 เท่าของเกณฑ์'],['use','ตามอัตราจ่ายจริง','สั่งเมื่อพอใช้ < N วัน สั่งเติมถึง 2N วันของอัตราจ่าย'],['mix','ผสม (ใช้ตัวที่สั่งมากกว่า)','เข้าเงื่อนไขอย่างใดอย่างหนึ่งก็สั่ง']];
+ $('#view').innerHTML=`<div class="mode">${md.map(([k,t,d])=>`<button data-m="${k}" aria-pressed="${M.m===k}">${t}<small>${d}</small></button>`).join('')}</div>
+ <div class="bar"><label>N (วัน)<select id="nn">${[15,30,45,60].map(x=>`<option${M.n===x?' selected':''}>${x}</option>`).join('')}</select></label><label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="all"${M.all?' checked':''}> แสดงทุก SKU</label><button class="cta" id="csv">${I('down')}ส่งออก CSV</button></div>
+ <div class="kpis">${kpi('SKU ที่ควรสั่ง',tot.length,'วิธีที่เลือก',tot.length,'cart','var(--blue)')}${kpi('จำนวนที่แนะนำรวม',fmt(tot.reduce((a,s)=>a+s.q,0)),'หน่วย',0,'box','var(--teal)')}${kpi('งบประมาณโดยประมาณ',fmt(tot.reduce((a,s)=>a+s.est,0))+' บาท','ตามราคาล็อตล่าสุด',0,'dollar','var(--green)')}${kpi('เข้าเกณฑ์ reorder level',S.filter(s=>s.tA).length,'SKU',0,'alert','var(--amber)')}${kpi('พอใช้ < '+M.n+' วัน',S.filter(s=>s.tB).length,'SKU',0,'clock','var(--pink)')}</div>
+ <div class="card">${h2('รายการแนะนำสั่งซื้อ ('+sh.length+')','list','var(--green)')}<div class="tw"><table><thead><tr><th>SKU</th><th>ยา</th><th class="n">ใช้ได้</th><th class="n">Reorder level</th><th class="n">จ่าย/วัน</th><th class="n">พอใช้ (วัน)</th><th>เหตุผล</th><th class="n">สั่งแนะนำ</th><th class="n">ประมาณ (บาท)</th></tr></thead><tbody>${sh.map(s=>`<tr><td>${esc(s.sku)}</td><td>${esc(nm(s.sku))}</td><td class="n">${fmt(s.usable)}</td><td class="n">${fmt(s.rl)}</td><td class="n">${f1(s.daily)}</td><td class="n">${isFinite(s.cover)?f1(s.cover):'-'}</td><td>${s.tA?bd('ต่ำกว่าเกณฑ์','w'):''}${s.tB?bd('พอใช้น้อย','a'):''}${!s.t?bd('ปกติ','g'):''}</td><td class="n">${fmt(s.q)}</td><td class="n">${fmt(s.est)}</td></tr>`).join('')}</tbody></table></div>
+ <p class="note">นับเฉพาะล็อตสถานะใช้งานที่ยังไม่หมดอายุ ณ ${esc(ref())} และเฉพาะ SKU ที่มีแถวในไฟล์คงคลัง</p></div>`;
+ $$('.mode button').forEach(b=>b.onclick=()=>{M.m=b.dataset.m;or_()});
+ $('#nn').onchange=e=>{M.n=+e.target.value;or_()};$('#all').onchange=e=>{M.all=e.target.checked;or_()};
+ $('#csv').onclick=()=>{const r=[['sku','name','usable','reorder_level','daily_use','cover_days','suggest_qty','est_cost']].concat(tot.map(s=>[s.sku,nm(s.sku),s.usable,s.rl,f1(s.daily),isFinite(s.cover)?f1(s.cover):'',s.q,Math.round(s.est)]));
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+r.map(x=>x.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n')],{type:'text/csv'}));a.download='order-suggestion.csv';a.click()}}
+
+function dp(){
+ const m=need('disp');if(m){$('#view').innerHTML=m;return}
+ const R=D.disp.filter(inP),ok=R.filter(d=>d.type!=='void'&&d.qty>0),byD={},byS={},byH=Array(24).fill(0),byW=Array(7).fill(0),hp={};
+ ok.forEach(d=>{byD[dOf(d)]=(byD[dOf(d)]||0)+1;byS[d.sku]=(byS[d.sku]||0)+d.qty;
+  const h=+d.datetime.slice(11,13)||0,p=d.pharmacist_code||'-';byH[h]++;byW[new Date(dOf(d)+'T00:00:00Z').getUTCDay()]++;(hp[p]=hp[p]||Array(24).fill(0))[h]++});
+ const days=[];if(P.from&&P.to)for(let x=P.from;x<=P.to&&days.length<400;x=add(x,1))days.push(x);
+ const top=Object.entries(byS).sort((a,b)=>b[1]-a[1]).slice(0,8),PH=phStats(),hasF=D.stock.length>0;
+ const peak=byH.indexOf(Math.max(...byH));
+ $('#view').innerHTML=`<div class="kpis">${kpi('รายการจ่าย',ok.length,'ไม่รวม void',0,'pill','var(--blue)')}${kpi('ปริมาณรวม',fmt(ok.reduce((a,d)=>a+d.qty,0)),'หน่วย',0,'box','var(--teal)')}${kpi('ผู้ป่วย (รหัสแฝง)',new Set(ok.map(d=>d.patient_code)).size,'',0,'user','var(--green)')}${kpi('SKU ที่จ่าย',Object.keys(byS).length,'',0,'layers','var(--purple)')}${kpi('ชั่วโมงที่จ่ายมากสุด',ok.length?String(peak).padStart(2,'0')+':00':'-',ok.length?byH[peak]+' รายการ':'',0,'clock','var(--amber)')}${kpi('Void / มีปัญหา',R.filter(d=>d.type==='void'||d.incident_ref||dFlags(d).length).length,'ในช่วงที่เลือก',1,'alert','var(--red)')}</div>
+ <div class="grid"><div class="card">${h2('จำนวนรายการจ่ายต่อวัน','trend','var(--blue)')}<div class="cw"><canvas id="c3"></canvas></div></div><div class="card">${h2('SKU ที่จ่ายมากที่สุด (หน่วย)','pill','var(--pink)')}<div class="cw"><canvas id="c4"></canvas></div></div>
+ <div class="card">${h2('รายการจ่ายตามชั่วโมง แยกตามเภสัชกร','clock','var(--amber)')}<div class="cw"><canvas id="c6"></canvas></div></div>
+ <div class="card">${h2('รายการจ่ายตามวันในสัปดาห์','cal','var(--teal)')}<div class="cw"><canvas id="c7"></canvas></div></div></div>
+ <div class="card" style="margin-bottom:12px">${h2('สรุปตามเภสัชกร','user','var(--green)')}<div class="tw"><table><thead><tr><th>เภสัชกร</th><th class="n">รายการจ่าย</th><th class="n">หน่วยรวม</th><th class="n">Void</th><th class="n">Incident</th>${hasF?'<th class="n">จ่ายไม่ตรง FEFO</th>':''}</tr></thead><tbody>${PH.map(p=>`<tr><td>${esc(p.p)}</td><td class="n">${fmt(p.n)}</td><td class="n">${fmt(p.u)}</td><td class="n">${p.v?bd(p.v,'w'):0}</td><td class="n">${p.inc?bd(p.inc,'r'):0}</td>${hasF?`<td class="n">${p.fe?bd(p.fe,'p'):0}</td>`:''}</tr>`).join('')||'<tr><td colspan="6" class="empty">ไม่พบรายการ</td></tr>'}</tbody></table></div></div>
+ <div class="card">${h2('รายการจ่ายยา','list','var(--blue)')}<div class="bar" style="background:none;padding:0"><label>ค้นหา (SKU, ชื่อ, ผู้ป่วย)<input id="q" type="search" value="${esc(V.q)}"></label><label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="bad"${V.bad?' checked':''}> เฉพาะรายการมีปัญหา</label></div><div class="tw"><table><thead><tr><th>วันเวลา</th><th>ID</th><th>ยา</th><th>ล็อต</th><th class="n">จำนวน</th><th>ผู้ป่วย</th><th>เภสัชกร</th><th>หมายเหตุ</th></tr></thead><tbody id="dt"></tbody></table></div></div>`;
+ bar('c3',days.map(x=>[x.slice(5),byD[x]||0]),'#4061e7',false);bar('c4',top,'pal',true);
+ const pl=Object.keys(hp).sort((a,b)=>hp[b].reduce((x,y)=>x+y,0)-hp[a].reduce((x,y)=>x+y,0)).slice(0,8);
+ stack('c6',byH.map((_,h)=>String(h).padStart(2,'0')),pl.map(p=>[p,hp[p]]));
+ bar('c7',WD.map((w,i)=>[w,byW[i]]),'pal',false);
+ const draw=()=>{V.q=$('#q').value;V.bad=$('#bad').checked;const q=V.q.toLowerCase();
+  const rows=R.filter(d=>(!q||(d.sku+nm(d.sku)+d.patient_code).toLowerCase().includes(q))&&(!V.bad||d.type==='void'||d.incident_ref||dFlags(d).length)).slice(0,500);
+  $('#dt').innerHTML=rows.map(d=>`<tr><td>${esc(d.datetime.slice(0,16).replace('T',' '))}</td><td>${esc(d.dispense_id)}</td><td>${esc(nm(d.sku))}</td><td>${esc(d.lot)}</td><td class="n">${esc(d.qty)}</td><td>${esc(d.patient_code)}</td><td>${esc(d.pharmacist_code)}</td><td>${d.type==='void'?bd('void','w'):''}${d.incident_ref?bd(d.incident_ref,'r'):''}${dFlags(d).map(t=>bd(t,'r')).join('')}</td></tr>`).join('')||'<tr><td colspan="8" class="empty">ไม่พบรายการ</td></tr>'};
+ $('#q').oninput=draw;$('#bad').onchange=draw;draw()}
+
+function fe(){
+ const m=need('stock','disp');if(m){$('#view').innerHTML=m;return}
+ const F=fefo().filter(x=>inP(x.d)),bad=F.filter(x=>x.bad),L=lots().filter(l=>l.usable);
+ const bp={},bs={};bad.forEach(x=>{const p=x.d.pharmacist_code||'-';bp[p]=(bp[p]||0)+1;bs[x.d.sku]=(bs[x.d.sku]||0)+1});
+ const skipped=new Set(bad.flatMap(x=>x.earlier.map(e=>e.stock_id))).size,pct=F.length?(100*(F.length-bad.length)/F.length):0;
+ const by={};L.forEach(l=>(by[l.sku]=by[l.sku]||[]).push(l));
+ const pick=Object.entries(by).flatMap(([k,a])=>a.sort((x,y)=>x.days-y.days).map((l,i)=>({...l,i})));
+ $('#view').innerHTML=`<div class="kpis">${kpi('รายการที่ตรวจ',fmt(F.length),'ไม่รวม void / ล็อตที่หาไม่พบ',0,'check','var(--blue)')}${kpi('จ่ายไม่ตรง FEFO',fmt(bad.length),'หยิบล็อตที่หมดอายุทีหลังก่อน',bad.length,'layers','var(--purple)')}${kpi('ตรงตาม FEFO',f1(pct)+'%','',0,'shield','var(--green)')}${kpi('ล็อตที่ถูกข้าม',skipped,'ล็อต',0,'box','var(--amber)')}${kpi('SKU ที่เกี่ยวข้อง',Object.keys(bs).length,'',0,'pill','var(--pink)')}</div>
+ <div class="grid"><div class="card">${h2('จ่ายไม่ตรง FEFO ตามเภสัชกร','user','var(--purple)')}<div class="cw"><canvas id="c8"></canvas></div></div><div class="card">${h2('จ่ายไม่ตรง FEFO ตาม SKU (Top 8)','pill','var(--pink)')}<div class="cw"><canvas id="c9"></canvas></div></div></div>
+ <div class="card" style="margin-bottom:12px">${h2('รายการที่จ่ายไม่ตรง FEFO ('+bad.length+')','alert','var(--red)')}<div class="tw"><table><thead><tr><th>วันเวลา</th><th>ID</th><th>ยา</th><th>ล็อตที่จ่าย</th><th>หมดอายุ</th><th>ควรหยิบก่อน</th><th>หมดอายุ</th><th class="n">คงเหลือ</th><th>เภสัชกร</th></tr></thead><tbody>${bad.slice(0,300).map(x=>{const e=x.earlier[0];return`<tr><td>${esc(x.d.datetime.slice(0,16).replace('T',' '))}</td><td>${esc(x.d.dispense_id)}</td><td>${esc(nm(x.d.sku))}</td><td>${esc(x.d.lot)}</td><td>${esc(x.used.expiry)}</td><td>${bd(e.lot,'p')}${x.earlier.length>1?bd('+'+(x.earlier.length-1)):''}</td><td>${esc(e.expiry)}</td><td class="n">${fmt(e.qty_on_hand)}</td><td>${esc(x.d.pharmacist_code)}</td></tr>`}).join('')||'<tr><td colspan="9" class="empty">ไม่พบรายการที่จ่ายผิดลำดับ FEFO</td></tr>'}</tbody></table></div>
+ <p class="note">เกณฑ์: ล็อตอื่นของ SKU เดียวกันที่สถานะใช้งาน รับเข้าแล้ว หมดอายุหลังวันจ่ายแต่ก่อนล็อตที่จ่าย และยังมียอดคงเหลือ (จึงมีของอยู่ตอนจ่ายแน่นอน) ข้อจำกัด: ไม่มีประวัติเคลื่อนไหวคงคลัง จึงตรวจล็อตที่ยอดเหลือเป็น 0 ในปัจจุบันไม่ได้</p></div>
+ <div class="card">${h2('ลำดับหยิบตาม FEFO ปัจจุบัน','layers','var(--teal)')}<div class="tw"><table><thead><tr><th>ยา</th><th>ลำดับ</th><th>ล็อต</th><th>หมดอายุ</th><th class="n">เหลืออีก (วัน)</th><th class="n">คงเหลือ</th></tr></thead><tbody>${pick.slice(0,400).map(l=>`<tr><td>${esc(nm(l.sku))}</td><td>${l.i===0?bd('หยิบก่อน','g'):bd('#'+(l.i+1))}</td><td>${esc(l.lot)}</td><td>${esc(l.expiry)}</td><td class="n">${l.days}</td><td class="n">${fmt(l.qty_on_hand)}</td></tr>`).join('')}</tbody></table></div></div>`;
+ bar('c8',Object.entries(bp).sort((a,b)=>b[1]-a[1]).slice(0,8),'pal',false);bar('c9',Object.entries(bs).sort((a,b)=>b[1]-a[1]).slice(0,8),'pal',true)}
+
+function an(){
+ const m=need('drug','stock','disp');if(m){$('#view').innerHTML=m;return}
+ const L=lots(),S=sk(),sm={};S.forEach(s=>sm[s.sku]=s);
+ const by={};L.filter(l=>l.usable).forEach(l=>(by[l.sku]=by[l.sku]||[]).push(l));
+ const W=[];Object.entries(by).forEach(([k,a])=>{a.sort((x,y)=>x.days-y.days);let cum=0;const dl=sm[k]?sm[k].daily:0;
+  a.forEach(l=>{const can=Math.max(0,dl*l.days-cum),w=Math.max(0,l.qty_on_hand-can);cum+=l.qty_on_hand;if(w>0)W.push({...l,w:Math.ceil(w),wv:Math.ceil(w)*(+l.unit_cost||0),dl})})});
+ W.sort((a,b)=>b.wv-a.wv);
+ const dead=S.filter(s=>s.usable>0&&s.use===0),R=D.disp.filter(inP),vo=R.filter(d=>d.type==='void').length,inc=R.filter(d=>d.incident_ref).length;
+ const A=S.map(s=>({...s,v:s.use*s.cost})).filter(s=>s.v>0).sort((a,b)=>b.v-a.v),tv=A.reduce((a,s)=>a+s.v,0);let c=0;
+ A.forEach(s=>{c+=s.v;s.cum=c/tv;s.k=s.cum-s.v/tv<0.8?'A':s.cum-s.v/tv<0.95?'B':'C'});
+ $('#view').innerHTML=`<div class="kpis">${kpi('มูลค่าคาดว่าใช้ไม่ทัน',fmt(W.reduce((a,l)=>a+l.wv,0))+' บาท',W.length+' ล็อต',W.length,'hour2','var(--red)')}${kpi('Dead stock',dead.length,'มียอดแต่ไม่มีการจ่ายในช่วงที่เลือก',dead.length,'box','var(--amber)')}${kpi('SKU ชั้น A (80% ของมูลค่าการใช้)',A.filter(s=>s.k==='A').length,'จาก '+A.length+' SKU',0,'trend','var(--green)')}${kpi('อัตรา Void',R.length?f1(100*vo/R.length)+'%':'-',vo+' จาก '+R.length+' รายการ',0,'ban','var(--purple)')}${kpi('Incident',inc,'ในช่วงที่เลือก',inc,'shield','var(--pink)')}</div>
+ <div class="grid"><div class="card">${h2('Top 10 SKU ตามมูลค่าการใช้ (บาท)','dollar','var(--green)')}<div class="cw"><canvas id="c10"></canvas></div></div>
+ <div class="card">${h2('สัดส่วน SKU ตามชั้น ABC','pie','var(--teal)')}<div class="cw"><canvas id="c11"></canvas></div></div></div>
+ <div class="card" style="margin-bottom:12px">${h2('ล็อตที่คาดว่าจะใช้ไม่ทันก่อนหมดอายุ ('+W.length+')','hour2','var(--red)')}<div class="tw"><table><thead><tr><th>ยา</th><th>ล็อต</th><th>หมดอายุ</th><th class="n">เหลืออีก (วัน)</th><th class="n">คงเหลือ</th><th class="n">จ่าย/วัน</th><th class="n">คาดเหลือทิ้ง</th><th class="n">มูลค่า (บาท)</th></tr></thead><tbody>${W.slice(0,200).map(l=>`<tr><td>${esc(nm(l.sku))}</td><td>${esc(l.lot)}</td><td>${esc(l.expiry)}</td><td class="n">${l.days}</td><td class="n">${fmt(l.qty_on_hand)}</td><td class="n">${f1(l.dl)}</td><td class="n">${bd(fmt(l.w),'w')}</td><td class="n">${fmt(l.wv)}</td></tr>`).join('')||'<tr><td colspan="8" class="empty">ไม่พบล็อตเสี่ยง</td></tr>'}</tbody></table></div>
+ <p class="note">จำลองการใช้ตามลำดับ FEFO ด้วยอัตราจ่ายเฉลี่ยในช่วงที่เลือก แล้วดูว่ายอดคงเหลือเกินที่ใช้ได้ก่อนหมดอายุเท่าไร</p></div>
+ <div class="grid"><div class="card">${h2('Dead stock','box','var(--amber)')}<div class="tw"><table><thead><tr><th>ยา</th><th class="n">ใช้ได้</th><th class="n">มูลค่า (บาท)</th></tr></thead><tbody>${dead.map(s=>`<tr><td>${esc(nm(s.sku))}</td><td class="n">${fmt(s.usable)}</td><td class="n">${fmt(s.usable*s.cost)}</td></tr>`).join('')||'<tr><td colspan="3" class="empty">ไม่มี</td></tr>'}</tbody></table></div></div>
+ <div class="card">${h2('การจัดชั้น ABC','trend','var(--green)')}<div class="tw"><table><thead><tr><th>ยา</th><th>ชั้น</th><th class="n">มูลค่าการใช้</th><th class="n">สะสม %</th></tr></thead><tbody>${A.map(s=>`<tr><td>${esc(nm(s.sku))}</td><td>${bd(s.k,s.k==='A'?'g':s.k==='B'?'a':'')}</td><td class="n">${fmt(s.v)}</td><td class="n">${f1(s.cum*100)}</td></tr>`).join('')}</tbody></table></div></div></div>`;
+ bar('c10',A.slice(0,10).map(s=>[s.sku,Math.round(s.v)]),'pal',true);
+ donut('c11',['A','B','C'].map((k,i)=>[k,A.filter(s=>s.k===k).length,['#2fb67c','#f5a524','#808080'][i]]))}
+
+/* ---------- shell ---------- */
+const VW={ov,ex,or:or_,dp,fe,an};
+function render(){
+ const h=D.have;$('#chips').innerHTML=[['drug','ทะเบียนยา'],['stock','คงคลัง'],['disp','จ่ายยา']].map(([k,l])=>`<span class="chip${h[k]?' ok':''}">${h[k]?I('check',14):''}${l}: ${h[k]?esc(h[k]):'ยังไม่โหลด'}</span>`).join('');
+ $('#bar').hidden=!(D.stock.length||D.disp.length);
+ $('#sub').textContent=D.asof?'ข้อมูล ณ '+D.asof:'โหลดไฟล์ JSON เพื่อเริ่มต้น';
+ $('#pinfo').textContent=P.from&&P.to?'ช่วง '+(dd(P.to,P.from)+1)+' วัน':'';
+ $$('#nav button[data-t]').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===V.tab));
+ if(!D.stock.length&&!D.disp.length&&!Object.keys(D.drug).length)return;VW[V.tab]()}
+$('#nav').addEventListener('click',e=>{const b=e.target.closest('button[data-t]');if(b){V.tab=b.dataset.t;render()}});
+$('#pf').onchange=e=>{P.from=e.target.value;render()};$('#pt').onchange=e=>{P.to=e.target.value;render()};
+$$('.pre').forEach(b=>b.onclick=()=>{const n=+b.dataset.d,ds=D.disp.map(dOf).sort();
+ if(!n&&ds.length){P.from=ds[0];P.to=ds[ds.length-1]}else if(n){P.to=P.to||D.asof||ds[ds.length-1];P.from=add(P.to,-(n-1))}
+ $('#pf').value=P.from;$('#pt').value=P.to;render()});
+/* โหลดอัตโนมัติจากโฟลเดอร์ data (ต้องเปิดผ่านเว็บเซิร์ฟเวอร์) */
+async function autoload(){
+ const base='data/';let names=[];
+ try{const r=await fetch(base,{cache:'no-store'});if(r.ok){const t=await r.text();names=[...t.matchAll(/href="([^"?#]+\.json)"/gi)].map(m=>decodeURIComponent(m[1]).split('/').pop())}}catch(e){}
+ if(!names.length){try{const r=await fetch(base+'index.json',{cache:'no-store'});if(r.ok){const j=await r.json();names=Array.isArray(j)?j:(j.files||[])}}catch(e){}}
+ names=[...new Set(names)].filter(n=>n!=='index.json'&&n!=='manifest.json');
+ if(!names.length)names=['drugs_update.json','stock (1).json','dispense-log (1).json'];
+ const fs=[],errors=[];
+ for(const n of names){try{const r=await fetch(base+encodeURIComponent(n),{cache:'no-store'});if(r.ok){const t=await r.text();fs.push({name:n,text:async()=>t})}else errors.push(n+': HTTP '+r.status)}catch(e){errors.push(n+': '+e.message)}}
+ if(fs.length){await ingest(fs);errors.forEach(e=>note('data/'+e))}else{note('โหลดอัตโนมัติจากโฟลเดอร์ data ไม่ได้ (ต้องเปิดผ่านเว็บเซิร์ฟเวอร์ และมีไฟล์ .json ในโฟลเดอร์) ใช้ปุ่มเลือกไฟล์แทนได้');errors.forEach(e=>note('data/'+e))}}
+icons();applyTheme();render();autoload();
+</script>
+</body>
+</html>
